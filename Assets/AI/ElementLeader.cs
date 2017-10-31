@@ -7,24 +7,25 @@ public class ElementLeader : MonoBehaviour {
     // 指示先（トランスフォーム）
     private Transform _targetPoint;
 
-    // ゾーン(優先度、占領チームをここから取得する)
-    [SerializeField]
-    private Zone[] _zone;
-
     // 所属チーム
-    private Team _team;
+    public Team Team { get; set; }
 
 
     // 目標達成
     private bool _success;
 
+    // マネージャー
+    ElementLeaderManager _elementManager;
+
+    // LeaderのAI
+    public int ID { get; set; }    
 
     /// <summary>
     /// 初期化
     /// </summary>
 	void Start ()
     {
-		
+        
 	}
 	
 	/// <summary>
@@ -35,37 +36,7 @@ public class ElementLeader : MonoBehaviour {
 		
 	}
 
-    /// <summary>
-    /// 優先度調査
-    /// </summary>
-    private void CheckPrioritylevels()
-    {
 
-    }
-    
-    /// <summary>
-    /// 拠点に入っている敵の数をチェック
-    /// </summary>
-    private void CheckEnemyNum()
-    {
-        switch (_team)
-        {
-            case Team.Blue:
-                break;
-            case Team.Red:
-                break;
-        }
-
-    }
-
-    /// <summary>
-    /// 指示をする
-    /// </summary>
-    /// <returns>ターゲット</returns>
-    public Transform Instruct()
-    {
-        return new GameObject().transform;
-    }
 
     /// <summary>
     /// Managerに走らせるためのやーつ
