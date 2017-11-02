@@ -29,7 +29,7 @@ public class ElementLeaderManager : MonoBehaviour {
     void Start () {
 
         // 各チームのAIの数を取得
-        _red_AI = 15;
+        _red_AI = 12;
         _blue_AI = 16;
         _total_AI = _red_AI + _blue_AI;
 
@@ -41,11 +41,11 @@ public class ElementLeaderManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		//foreach(var leader in _leader)
-  //      {
-  //          leader.Run();
-  //      }
-	}
+        foreach (var leader in _leader)
+        {
+            leader.Run();
+        }
+    }
 
     /// <summary>
     /// 指定したidの小隊長を取得
@@ -97,22 +97,7 @@ public class ElementLeaderManager : MonoBehaviour {
     /// </summary>
     void CreateLeader()
     {
-        // リーダーは４人グループに１人存在する
-        _total_leader = _total_AI / 4;
-        if (_total_AI % 4 > 0)
-            _total_leader++;
-        _leader = new ElementLeader[_total_leader];
-
-        // 実体化
-        ElementLeader prefab = _leaderPrefab;
-        ElementLeader el;
-        for(var i = 0; i<_leader.Length;i++)
-        {
-            el = Instantiate(prefab);
-            _leader[i] = el.GetComponent<ElementLeader>();
-        }
-
-        // テスト
+        // リーダーの生成
         _red_leader = _red_AI / 4;
         if (_red_AI % 4 > 0)
             _red_leader++;
@@ -120,24 +105,38 @@ public class ElementLeaderManager : MonoBehaviour {
         if (_blue_AI % 4 > 0)
             _blue_leader++;
 
-        _red_leader = _red_AI / 4;
+        _total_leader = _red_leader + _blue_leader;
+        _leader = new ElementLeader[_total_leader];
 
-        Debug.Log(_red_leader);
+        // 実体化
+        ElementLeader prefab = _leaderPrefab;
+        ElementLeader el;
+        for (var i = 0; i < _leader.Length; i++)
+        {
+            el = Instantiate(prefab);
+            _leader[i] = el.GetComponent<ElementLeader>();
+        }
 
+        // 生成後、チームとIDを割り当てる
         for (var i = 0; i < _red_leader; i++)
         {
             _leader[i].Team = Team.Red;
+            _leader[i].ID = i + 1;
+            
         }
         for (var i = _red_leader; i < _total_leader; i++)
         {
             _leader[i].Team = Team.Blue;
+            _leader[i].ID = i - _red_leader + 1;
         }
 
+        // デバッグ表示
+        Debug.Log("RED_TEAM: " + _red_AI + "," + "BLUE_TEAM: " + _blue_AI);
         for (var i = 0; i < _leader.Length; i++)
         {
-            Debug.Log(_leader[i].Team);
+            Debug.Log("Team:" + _leader[i].Team + ": ID:" + _leader[i].ID);
         }
-        
+
 
     }
 
