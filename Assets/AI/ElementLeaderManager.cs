@@ -8,8 +8,9 @@ public class ElementLeaderManager : MonoBehaviour {
 
     // ゾーン(優先度、占領チームをここから取得する)
     [SerializeField]
-    private Zone[] _zone;
+    public Zone[] _zone;
 
+    
     // リーダー
     ElementLeader[] _leader;
     [SerializeField]
@@ -29,7 +30,7 @@ public class ElementLeaderManager : MonoBehaviour {
     void Start () {
 
         // 各チームのAIの数を取得
-        _red_AI = 12;
+        _red_AI = 16;
         _blue_AI = 16;
         _total_AI = _red_AI + _blue_AI;
 
@@ -87,6 +88,14 @@ public class ElementLeaderManager : MonoBehaviour {
     /// <returns>ターゲット</returns>
     public Transform Instruct()
     {
+        // 自陣敵陣の調査
+        // _zone[i].GetDominatedTeam();
+        // 優先度
+        int priority = 1; // _zone[i].GetPriority(this.Team);
+
+
+
+
         return new GameObject().transform;
     }
 

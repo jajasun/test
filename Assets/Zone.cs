@@ -6,8 +6,9 @@ using UnityEngine.Networking;
 public class Zone : NetworkBehaviour {
   private int[] unitCount = new int[2];
   private int dominationCounter = 0;
-  private Team dominatedTeam = Team.Neutral;
-  private State state = State.Neutral;
+  public Team dominatedTeam = Team.Neutral;
+  public State state = State.Neutral;
+  public int Priority;
   [SerializeField] private TicketManager ticketManager;
   public enum State {
     Dominated,

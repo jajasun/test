@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ElementLeader : MonoBehaviour {
+public class ElementLeader : MonoBehaviour
+{
 
     // 指示先（トランスフォーム）
     private Transform _targetPoint;
@@ -18,23 +19,24 @@ public class ElementLeader : MonoBehaviour {
     ElementLeaderManager _elementManager;
 
     // LeaderのAI
-    public int ID { get; set; }    
+    public int ID { get; set; }
+
 
     /// <summary>
     /// 初期化
     /// </summary>
-	void Start ()
+    void Start()
     {
-        
-	}
-	
-	/// <summary>
+
+    }
+
+    /// <summary>
     /// 更新
     /// </summary>
-	void Update ()
+    void Update()
     {
-		
-	}
+
+    }
 
 
 
@@ -50,8 +52,13 @@ public class ElementLeader : MonoBehaviour {
         }
         else
         {
-            // 戦況（どこが自陣で敵陣か）を判断
+            
             // 優先度を調査
+            
+            // 戦況（どこが自陣で敵陣か）を判断
+
+
+
             // 上記２つを加味してターゲットにする陣地を決める
 
             // ターゲット先が自陣（防衛）
