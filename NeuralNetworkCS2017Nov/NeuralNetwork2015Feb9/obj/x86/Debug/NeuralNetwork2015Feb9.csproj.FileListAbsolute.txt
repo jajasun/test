@@ -1,0 +1,4 @@
+\\psf\home\documents\visual studio 2010\Projects\NeuralNetwork2015Feb9\NeuralNetwork2015Feb9\bin\Debug\NeuralNetwork2015Feb9.exe
+\\psf\home\documents\visual studio 2010\Projects\NeuralNetwork2015Feb9\NeuralNetwork2015Feb9\bin\Debug\NeuralNetwork2015Feb9.pdb
+\\psf\home\documents\visual studio 2010\Projects\NeuralNetwork2015Feb9\NeuralNetwork2015Feb9\obj\x86\Debug\NeuralNetwork2015Feb9.exe
+\\psf\home\documents\visual studio 2010\Projects\NeuralNetwork2015Feb9\NeuralNetwork2015Feb9\obj\x86\Debug\NeuralNetwork2015Feb9.pdb
