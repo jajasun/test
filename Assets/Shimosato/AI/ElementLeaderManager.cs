@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class ElementLeaderManager : MonoBehaviour {
 
-
-
     // ゾーン(優先度、占領チームをここから取得する)
     [SerializeField]
     public Zone[] _zone;
@@ -26,16 +24,28 @@ public class ElementLeaderManager : MonoBehaviour {
     int _blue_leader;
     int _total_leader;
 
+
+    // 小隊の人数
+    [SerializeField]
+    private int party_num = 4;
+
+    Brain brain;
+
     // Use this for initialization
     void Start () {
 
         // 各チームのAIの数を取得
-        _red_AI = 16;
-        _blue_AI = 16;
+        _red_AI = 15;
+        _blue_AI = 15;
         _total_AI = _red_AI + _blue_AI;
 
 
         CreateLeader();
+
+
+        brain = new Brain();
+        brain.Initialize();
+        brain.Training();
 
 
     }
@@ -71,7 +81,7 @@ public class ElementLeaderManager : MonoBehaviour {
     /// </summary>
     private void CheckPrioritylevels()
     {
-
+        // もうセットしてあるつもり
     }
 
     /// <summary>
@@ -107,11 +117,11 @@ public class ElementLeaderManager : MonoBehaviour {
     void CreateLeader()
     {
         // リーダーの生成
-        _red_leader = _red_AI / 4;
-        if (_red_AI % 4 > 0)
+        _red_leader = _red_AI / party_num;
+        if (_red_AI % party_num > 0)
             _red_leader++;
-        _blue_leader = _blue_AI / 4;
-        if (_blue_AI % 4 > 0)
+        _blue_leader = _blue_AI / party_num;
+        if (_blue_AI % party_num > 0)
             _blue_leader++;
 
         _total_leader = _red_leader + _blue_leader;
@@ -148,8 +158,240 @@ public class ElementLeaderManager : MonoBehaviour {
 
 
     }
+}
+public class Brain
+{
+
+    static float[,] TrainingData = new float[,]
+    {
+        // データの作り方
+        // 【入力】拠点付近の味方の数、拠点付近の敵の数、拠点までの距離、陣状況(0.0 = empty,0.5 = myteam,1.0 = enemy)、時間、チケットの状況、他の味方がどこに向かおうとしているか
+        // 【出力】拠点 A,B,C,D,E（理想）
+        
+        // 味方、敵、距離A、距離B、距離C、距離D、距離E、陣、時間、チケット、他タゲ                                                       拠点A、B、C、D、E
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+        // 味方敵ともに０、Aの距離に近くて、陣はエンプティ、１５０秒以下、チケットも０、他タゲも０
+        {  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f                                                       , 0.0f , 0.0f , 0.0f , 0.0f , 0.0f},
+
+    };
+
+    
+    
+    static float[,] TrainingSet = new float[,]  {
+        // degree radian  sin
+        { 0.0f,  0.000f,  0.000f},		// 0 degree
+        { 5.0f,  0.087f,  0.087f},
+        {10.0f,  0.175f,  0.174f},
+        {15.0f,  0.262f,  0.259f},
+        {20.0f,  0.349f,  0.342f},
+        {25.0f,  0.436f,  0.432f},
+        {30.0f,  0.524f,  0.500f},
+        {35.0f,  0.611f,  0.574f},
+        {40.0f,  0.698f,  0.643f},
+        {45.0f,  0.785f,  0.707f},		// 45 degree
+        {50.0f,  0.873f,  0.766f},
+        {55.0f,  0.960f,  0.819f},
+        {60.0f,  1.047f,  0.866f},
+        {65.0f,  1.134f,  0.906f},
+        {70.0f,  1.222f,  0.940f},
+        {75.0f,  1.309f,  0.966f},
+        {80.0f,  1.399f,  0.985f},
+        {85.0f,  1.484f,  0.996f},
+        {90.0f,  1.571f,  1.000f},		// 90 degree
+        {95.0f,  1.658f,  0.996f},
+        {100.0f, 1.745f,  0.985f},
+        {105.0f, 1.833f,  0.966f},
+        {110.0f, 1.920f,  0.940f},
+        {115.0f, 2.007f,  0.906f},
+        {120.0f, 2.094f,  0.866f},
+        {125.0f, 2.182f,  0.819f},
+        {130.0f, 2.269f,  0.766f},
+        {135.0f, 2.356f,  0.707f},		// 135 degree
+        {140.0f, 2.443f,  0.643f},
+        {145.0f, 2.531f,  0.574f},
+        {150.0f, 2.618f,  0.500f},
+        {155.0f, 2.705f,  0.423f},
+        {160.0f, 2.793f,  0.342f},
+        {165.0f, 2.880f,  0.259f},
+        {170.0f, 2.967f,  0.174f},
+        {175.0f, 3.054f,  0.087f},
+        {180.0f, 3.142f,  0.000f},		// 180 degree
+        {185.0f, 3.246f, -0.087f},
+        {190.0f, 3.316f, -0.174f},
+        {195.0f, 3.403f, -0.259f},
+        {200.0f, 3.491f, -0.342f},
+        {205.0f, 3.578f, -0.423f},
+        {210.0f, 3.665f, -0.500f},
+        {215.0f, 3.752f, -0.574f},
+        {220.0f, 3.840f, -0.643f},
+        {225.0f, 3.927f, -0.707f},		// 225 degree
+        {230.0f, 4.014f, -0.766f},
+        {235.0f, 4.102f, -0.819f},
+        {240.0f, 4.189f, -0.866f},
+        {245.0f, 4.276f, -0.906f},
+        {250.0f, 4.363f, -0.940f},
+        {255.0f, 4.451f, -0.966f},
+        {260.0f, 4.538f, -0.985f},
+        {265.0f, 4.625f, -0.996f},
+        {270.0f, 4.712f, -1.000f},		// 270 degree
+        {275.0f, 4.800f, -0.996f},
+        {280.0f, 4.887f, -0.985f},
+        {285.0f, 4.974f, -0.966f},
+        {290.0f, 5.061f, -0.940f},
+        {295.0f, 5.149f, -0.906f},
+        {300.0f, 5.236f, -0.866f},
+        {305.0f, 5.323f, -0.819f},
+        {310.0f, 5.411f, -0.766f},
+        {315.0f, 5.498f, -0.707f},		// 315 degree
+        {320.0f, 5.585f, -0.643f},
+        {325.0f, 5.672f, -0.574f},
+        {330.0f, 5.760f, -0.500f},
+        {335.0f, 5.847f, -0.423f},
+        {340.0f, 5.934f, -0.342f},
+        {345.0f, 6.021f, -0.259f},
+        {350.0f, 6.109f, -0.174f},
+        {355.0f, 6.196f, -0.087f},
+        {360.0f, 6.283f,  0.000f}		// 360 degree
+    };
+
+
+    NeuralNetwork Neuron;
+    public const int NumberOfData = 73;
+    public const float LearningRate = 0.2f;
+    public const float Moment = 0.99f;
+
+    public int NumberOfInputNodes = 1;
+    public int NumberOfHiddenNodes = NumberOfData;
+    public int NumberOfOutputNodes = 1;
 
 
 
+    // コンストラクタ
+    public Brain()
+    {
+        // ニューラルネットワークオブジェクトを生成する
+        Neuron = new NeuralNetwork();
+    }
+
+    // ニューラルネットワークを初期化する
+    public void Initialize()
+    {
+        // ニューラルネットワークを生成する
+        Neuron.Initialize(NumberOfInputNodes, NumberOfHiddenNodes, NumberOfOutputNodes);
+        // 学習率を設定する
+        Neuron.SetLearningRate(LearningRate);
+        // モメンタムを設定する
+        Neuron.SetMomentum(true, Moment);
+    }
+
+    // ニューラルネットワークをトレーニングする
+    public void Training()
+    {
+        float error = 1.0f;
+        int count = 0;
+
+        Neuron.DumpData("PreTraining.txt");
+        while ((error > 0.0001) && (count < 80000))
+        {
+            error = 0;
+            count++;
+            for (int i = 0; i < NumberOfData; i++)
+            {
+                // ニューラルネットワークに値を入力する
+                Neuron.SetInput(0, TrainingSet[i, 0] / 360.0f);
+                // ニューラルネットワークに理想値を入力する
+                Neuron.SetDesiredOutput(0, ((TrainingSet[i, 2] + 1.0f) / 2.0f));
+
+                // 前方伝播する
+                Neuron.FeedForward();
+                // 誤差を計算する
+                error += Neuron.CalculateError();
+                // 誤差逆伝播する
+                Neuron.BackPropagate();
+            }
+            error = error / NumberOfData;
+        }
+
+        Neuron.DumpData("PostTraining.txt");
+        Debug.Log("Error: {0}" + error);
+        Debug.Log("Count: {0}" + count);
+
+        int degree = 0;
+        for (;;)
+        {
+            Neuron.SetInput(0, degree / 360.0f);
+            Neuron.FeedForward();
+            Debug.Log("sin({0,3}) " +  degree);
+            Debug.Log("{0,6:f3}" + (Neuron.GetOutput(0) * 2.0f - 1.0f));
+            degree += 45;
+            if (degree > 360)
+                break;
+        }
+    }
+
+
+    // ・ほかの味方達が、どこの拠点をターゲットにしているか
+    // 出力結果（例：A地点）を配列にストックしていく
+    // float[] targetPoint;
+    // AI1のターゲットがAに決まる
+    // targetPoint[A] += 1.0f;
+    // 0.0 ~ 1.0の範囲にするために 16（人数で割る）
+    // targetPoint[A] /= 16f;
+    // 出た結果を入力に使用する
+    void Calc()
+    {
+        int[] targetPointNum = new int[5];
+
+        // 出力結果を取得
+        int id = 1;// A
+        targetPointNum[id] += 1;
+
+        float target = targetPointNum[id];
+        target /= 16f;
+    }
 
 }
+
+
+
